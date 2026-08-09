@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>온보딩 진단 응답 취합기 · 인재개발팀</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{--ink:#1a2230;--ink-soft:#4a556a;--line:#e3e7ee;--line-soft:#eef1f6;--bg:#f6f7fa;--card:#fff;
+    --accent:#1f6feb;--accent-soft:#eaf1fe;--ok:#0f7a4d;--ok-soft:#e7f4ee;--warn:#b4530a;--warn-soft:#fdf4e7;
+    --shadow:0 1px 2px rgba(20,30,50,.04),0 8px 24px rgba(20,30,50,.06)}
+  *{box-sizing:border-box}body{margin:0;font-family:'Pretendard',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 20px 90px}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .mk{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1f6feb,#0b3d91);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12px}
+  .brand b{font-size:15px;font-weight:700}.brand span{display:block;font-size:11.5px;color:var(--ink-soft)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:22px;margin-bottom:16px}
+  h1{font-size:20px;margin:0 0 4px}.lead{color:var(--ink-soft);font-size:13.5px;margin:0 0 4px}
+  .intake{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+  .drop{border:2px dashed #c4cede;border-radius:12px;padding:26px 18px;text-align:center;transition:.15s;background:#fbfcff;cursor:pointer}
+  .drop.hot{border-color:var(--accent);background:var(--accent-soft)}
+  .drop .big{font-size:15px;font-weight:700;margin-bottom:4px}
+  .drop .sm{font-size:12.5px;color:var(--ink-soft)}
+  .drop .icn{font-size:30px;margin-bottom:8px;opacity:.7}
+  .paste .lb{font-size:12.5px;font-weight:600;margin-bottom:6px;display:block;color:var(--ink-soft)}
+  textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:12.5px;font-family:ui-monospace,Menlo,monospace;color:var(--ink);background:#fff;min-height:118px;resize:vertical}
+  textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,111,235,.10)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:none;border-radius:10px;padding:11px 18px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:.12s}
+  .btn.primary{background:var(--accent);color:#fff}.btn.primary:hover{background:#155fd4}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}.btn.ghost:hover{border-color:#b9c6e6}
+  .btn.sm{padding:8px 13px;font-size:12.5px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .toast{font-size:12.5px;padding:8px 12px;border-radius:8px;margin-top:10px;display:none}
+  .toast.ok{background:var(--ok-soft);color:var(--ok);display:block}
+  .toast.err{background:#fdecec;color:#a11;display:block}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 0}
+  .stat{background:var(--line-soft);border-radius:10px;padding:10px 14px;min-width:96px}
+  .stat .n{font-size:20px;font-weight:800}.stat .l{font-size:11.5px;color:var(--ink-soft)}
+  .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .bar h2{font-size:15px;margin:0;flex:1}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:11.5px;font-weight:700;color:var(--ink-soft);padding:9px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+  tr:hover td{background:#fafbfe}
+  .tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+  .tag.appr{background:#efe9fb;color:#5b3ea6}
+  .dup{font-size:10.5px;font-weight:700;color:var(--warn);background:var(--warn-soft);border:1px solid #f0d6b8;border-radius:5px;padding:1px 6px;margin-left:6px}
+  .del{background:none;border:none;color:#c0392b;cursor:pointer;font-size:13px;padding:4px 8px;border-radius:6px}.del:hover{background:#fdecec}
+  .empty{text-align:center;color:var(--ink-soft);padding:40px 10px;font-size:13.5px}
+  .muted{color:var(--ink-soft);font-size:12.5px}
+  .grade{font-weight:800;border-radius:6px;padding:1px 8px;font-size:12px}
+  .note{font-size:11.5px;color:var(--ink-soft);background:var(--line-soft);border-radius:9px;padding:11px 14px;margin-top:12px;line-height:1.5}
+  @media(max-width:760px){.intake{grid-template-columns:1fr}.hidecol{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><div class="brand"><div class="mk">HR</div>
+    <div><b>온보딩 진단 응답 취합기</b><span>인재개발팀 전용 · 브라우저에서만 처리(외부 전송 없음)</span></div></div></div>
+
+  <div class="card">
+    <h1>응답 모으기</h1>
+    <p class="lead">대상자가 회신한 응답 파일(.json)을 아래로 끌어다 놓거나, 응답 코드를 붙여넣으세요. 여러 개를 한 번에 넣어도 됩니다.</p>
+    <div class="intake">
+      <label class="drop" id="drop">
+        <input type="file" id="fileInput" accept=".json,application/json" multiple hidden>
+        <div class="icn">&#128228;</div>
+        <div class="big">응답 파일 끌어다 놓기</div>
+        <div class="sm">또는 클릭해서 .json 파일 선택 (여러 개 가능)</div>
+      </label>
+      <div class="paste">
+        <span class="lb">응답 코드 붙여넣기 (HRONB1: 로 시작, 여러 줄 가능)</span>
+        <textarea id="codeInput" placeholder="HRONB1:eyJf..."></textarea>
+        <button class="btn primary sm" style="margin-top:10px" onclick="ingestCodes()">코드 추가</button>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="card">
+    <div class="bar">
+      <h2>취합 현황</h2>
+      <button class="btn ghost sm" onclick="saveSession()">작업 저장</button>
+      <button class="btn ghost sm" onclick="document.getElementById('sessInput').click()">저장본 불러오기</button>
+      <input type="file" id="sessInput" accept=".json" hidden>
+      <button class="btn ghost sm" onclick="clearAll()">전체 비우기</button>
+      <button class="btn primary sm" id="xlsxBtn" onclick="exportXLSX()">Excel로 내보내기</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div id="tableBox" style="margin-top:14px"></div>
+    <div class="note">중복 표시는 같은 대상자·차수·역할의 응답이 2건 이상일 때 붙습니다. Excel 내보내기 시에는 <b>가장 최근 제출본</b>만 반영됩니다. 개별 행은 휴지통으로 삭제할 수 있습니다. 이 페이지는 응답을 외부로 전송하지 않으며, 새로고침 시 초기화되므로 중간 저장을 권장합니다.</div>
+  </div>
+</div>
+
+<script>
+const KEYLABEL={'1_new':'1차 · 입사자','1_hm':'1차 · HM','2_new':'2차 · 입사자','2_hm':'2차 · HM'};
+const SHEET={'1_new':'1차_입사자','1_hm':'1차_HM','2_new':'2차_입사자','2_hm':'2차_HM','approval':'임원결재'};
+let records=[];   // {rec, id}
+const $=id=>document.getElementById(id);
+const esc=s=>(s??'').toString().replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+function identity(r){
+  if(r._type==='approval')return 'approval|'+(r.입사자?.성명||'')+'|'+(r.입사자?.입사일||'');
+  return (r._key||'')+'|'+(r.대상자||r.작성자||'')+'|'+(r.입사일||'');
+}
+function addRecord(r){
+  if(!r||!r._type){return false;}
+  records.push({rec:r,id:identity(r)});
+  return true;
+}
+function toast(msg,ok=true){const t=$('toast');t.textContent=msg;t.className='toast '+(ok?'ok':'err');clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3500);}
+
+/* ---- 파일 인입 ---- */
+const drop=$('drop');
+['dragenter','dragover'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('hot');}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('hot');}));
+drop.addEventListener('drop',ev=>handleFiles(ev.dataTransfer.files));
+drop.addEventListener('click',()=>$('fileInput').click());
+$('fileInput').addEventListener('change',e=>handleFiles(e.target.files));
+function handleFiles(files){
+  let ok=0,bad=0,pending=files.length;
+  if(!pending)return;
+  [...files].forEach(f=>{
+    const rd=new FileReader();
+    rd.onload=()=>{try{
+        const txt=rd.result.trim();
+        let parsed;
+        if(txt.startsWith('HRONB1:'))parsed=decodeCode(txt);
+        else parsed=JSON.parse(txt);
+        // 저장본(배열) 또는 단일 레코드 모두 허용
+        if(Array.isArray(parsed)){parsed.forEach(x=>{addRecord(x)&&ok++;});}
+        else if(parsed && parsed._type){addRecord(parsed);ok++;}
+        else bad++;
+      }catch(e){bad++;}
+      if(--pending===0){refresh();toast(`파일 처리 완료: ${ok}건 추가${bad?`, ${bad}건 인식 실패`:''}`,bad===0);}
+    };
+    rd.readAsText(f);
+  });
+}
+/* ---- 코드 인입 ---- */
+function decodeCode(line){
+  const b=line.replace(/^HRONB1:/,'').trim();
+  return JSON.parse(decodeURIComponent(escape(atob(b))));
+}
+function ingestCodes(){
+  const raw=$('codeInput').value;
+  const lines=raw.split(/\r?\n/).map(s=>s.trim()).filter(s=>s.startsWith('HRONB1:'));
+  if(!lines.length){toast('HRONB1: 로 시작하는 코드를 찾지 못했습니다.',false);return;}
+  let ok=0,bad=0;
+  lines.forEach(l=>{try{const r=decodeCode(l);if(r&&r._type){addRecord(r);ok++;}else bad++;}catch(e){bad++;}});
+  $('codeInput').value='';refresh();
+  toast(`코드 처리 완료: ${ok}건 추가${bad?`, ${bad}건 실패`:''}`,bad===0);
+}
+
+/* ---- 표시 ---- */
+function dupIds(){
+  const cnt={};records.forEach(x=>cnt[x.id]=(cnt[x.id]||0)+1);
+  return cnt;
+}
+function summaryOf(r){
+  if(r._type==='approval')return `총점 ${r.총점||0} · ${r.등급||'-'}등급`;
+  if(r.리커트평균)return `리커트 평균 ${r.리커트평균}`;
+  return '';
+}
+function gradeColor(g){return{S:'#0f7a4d',A:'#1f6feb','B+':'#0891b2',B:'#b4830a',C:'#c0392b'}[g]||'#4a556a';}
+function refresh(){
+  const cnt=dupIds();
+  // stats
+  const by={};records.forEach(x=>{const k=x.rec._type==='approval'?'approval':x.rec._key;by[k]=(by[k]||0)+1;});
+  const order=['1_new','1_hm','2_new','2_hm','approval'];
+  $('stats').innerHTML=`<div class="stat"><div class="n">${records.length}</div><div class="l">전체</div></div>`+
+    order.filter(k=>by[k]).map(k=>`<div class="stat"><div class="n">${by[k]}</div><div class="l">${k==='approval'?'임원결재':KEYLABEL[k]}</div></div>`).join('');
+  // table
+  if(!records.length){$('tableBox').innerHTML='<div class="empty">아직 취합된 응답이 없습니다. 파일을 끌어다 놓거나 코드를 붙여넣어 시작하세요.</div>';$('xlsxBtn').disabled=true;return;}
+  $('xlsxBtn').disabled=false;
+  const rows=records.map((x,i)=>{
+    const r=x.rec,isAppr=r._type==='approval';
+    const type=isAppr?'<span class="tag appr">임원결재</span>':`<span class="tag">${esc(KEYLABEL[r._key]||r._key)}</span>`;
+    const name=isAppr?(r.입사자?.성명||'-'):(r.대상자||r.작성자||'-');
+    const dept=isAppr?(r.입사자?.소속||''):(r.소속||'');
+    const cl=isAppr?(r.입사자?.직급||''):(r.직급CL||'');
+    const when=isAppr?(r.제출시각||''):(r.제출시각||'');
+    const dup=cnt[x.id]>1?'<span class="dup">중복</span>':'';
+    let summ=summaryOf(r);
+    if(isAppr&&r.등급)summ=`총점 ${r.총점||0} · <span class="grade" style="color:${gradeColor(r.등급)};background:${gradeColor(r.등급)}18">${r.등급}</span>`;
+    return `<tr>
+      <td>${type}</td>
+      <td><b>${esc(name)}</b>${dup}</td>
+      <td class="hidecol">${esc(dept)}</td>
+      <td>${esc(cl)}</td>
+      <td class="hidecol muted">${esc(when)}</td>
+      <td>${summ}</td>
+      <td style="text-align:right"><button class="del" title="삭제" onclick="removeRow(${i})">&#128465;</button></td>
+    </tr>`;
+  }).join('');
+  $('tableBox').innerHTML=`<table><thead><tr>
+    <th>유형</th><th>대상/작성자</th><th class="hidecol">소속</th><th>CL</th><th class="hidecol">제출시각</th><th>요약</th><th></th>
+    </tr></thead><tbody>${rows}</tbody></table>`;
+}
+function removeRow(i){records.splice(i,1);refresh();}
+function clearAll(){if(records.length&&!confirm('취합된 응답을 모두 비웁니다. 계속할까요?'))return;records=[];refresh();toast('전체 비움 완료');}
+
+/* ---- 세션 저장/불러오기 ---- */
+function saveSession(){
+  if(!records.length){toast('저장할 응답이 없습니다.',false);return;}
+  const blob=new Blob([JSON.stringify(records.map(x=>x.rec),null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`온보딩취합_저장본_${new Date().toISOString().slice(0,10)}.json`;a.click();
+  toast('작업 저장 완료. 다음에 이 파일을 불러오면 이어서 작업할 수 있습니다.');
+}
+$('sessInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{const arr=JSON.parse(rd.result);if(!Array.isArray(arr))throw 0;records=[];arr.forEach(r=>addRecord(r));refresh();toast(`저장본 불러오기 완료: ${records.length}건`);}catch(err){toast('저장본 형식이 올바르지 않습니다.',false);}};
+  rd.readAsText(f);e.target.value='';
+});
+
+/* ---- Excel 내보내기 ---- */
+function dedupeLatest(list){
+  // 같은 identity면 제출시각 최신 1건만
+  const map=new Map();
+  list.forEach(x=>{
+    const cur=map.get(x.id);
+    if(!cur)map.set(x.id,x);
+    else{
+      const a=x.rec.제출시각||'',b=cur.rec.제출시각||'';
+      if(a>=b)map.set(x.id,x);
+    }
+  });
+  return [...map.values()];
+}
+function flattenApproval(r){
+  const o={제출시각:r.제출시각||''};
+  o['입사자_소속']=r.입사자?.소속||'';o['입사자_성명']=r.입사자?.성명||'';o['입사일']=r.입사자?.입사일||'';o['직급']=r.입사자?.직급||'';
+  Object.entries(r.팀장평가||{}).forEach(([k,v])=>{o[`${k}_선택`]=v.선택;o[`${k}_취득(배점${v.배점})`]=v.취득;});
+  o['직무역량(70)']=r.직무역량점수;o['조직적응(30)']=r.조직적응점수;o['총점']=r.총점;o['팀장환산등급']=r.등급;
+  o['팀장_성명']=r.팀장?.성명||'';o['팀장_의견']=r.팀장?.의견||'';o['팀장_서명']=r.팀장?.서명||'';
+  o['임원_점수']=r.담당임원?.점수||'';o['임원_등급']=r.담당임원?.등급||'';o['임원_의견']=r.담당임원?.의견||'';o['임원_서명']=r.담당임원?.서명||'';
+  return o;
+}
+function stripMeta(r){const o={};Object.keys(r).forEach(k=>{if(k!=='_type'&&k!=='_key')o[k]=r[k];});return o;}
+function exportXLSX(){
+  if(typeof XLSX==='undefined'){exportCSVfallback();return;}
+  const clean=dedupeLatest(records);
+  const groups={};clean.forEach(x=>{const k=x.rec._type==='approval'?'approval':x.rec._key;(groups[k]=groups[k]||[]).push(x.rec);});
+  const wb=XLSX.utils.book_new();
+  ['1_new','1_hm','2_new','2_hm','approval'].forEach(k=>{
+    if(!groups[k])return;
+    const rows=groups[k].map(r=>k==='approval'?flattenApproval(r):stripMeta(r));
+    const ws=XLSX.utils.json_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb,ws,SHEET[k]);
+  });
+  if(!wb.SheetNames.length){toast('내보낼 응답이 없습니다.',false);return;}
+  XLSX.writeFile(wb,`온보딩진단_취합_${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast(`Excel 내보내기 완료 (중복 정리 후 ${clean.length}건, ${wb.SheetNames.length}개 시트)`);
+}
+function exportCSVfallback(){
+  const clean=dedupeLatest(records);
+  const groups={};clean.forEach(x=>{const k=x.rec._type==='approval'?'approval':x.rec._key;(groups[k]=groups[k]||[]).push(x.rec);});
+  Object.entries(groups).forEach(([k,arr])=>{
+    const rows=arr.map(r=>k==='approval'?flattenApproval(r):stripMeta(r));
+    const cols=[...new Set(rows.flatMap(r=>Object.keys(r)))];
+    const cell=v=>{v=(v??'').toString();return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+    const csv=[cols.join(','),...rows.map(r=>cols.map(c=>cell(r[c])).join(','))].join('\n');
+    const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`온보딩취합_${SHEET[k]}.csv`;a.click();
+  });
+  toast('Excel 라이브러리를 불러오지 못해 CSV로 내보냈습니다.',true);
+}
+refresh();
+</script>
+</body>
+</html>

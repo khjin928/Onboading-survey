@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>온보딩 적응 만족도 · 담당임원 결재</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a2230;--ink-soft:#4a556a;--line:#e3e7ee;--line-soft:#eef1f6;--bg:#f6f7fa;--card:#fff;
+    --accent:#0b3d91;--accent2:#1f6feb;--accent-soft:#eaf1fe;--warn:#b4530a;--ok:#0f7a4d;
+    --gS:#0f7a4d;--gA:#1f6feb;--gB1:#0891b2;--gB:#b4830a;--gC:#c0392b;
+    --shadow:0 1px 2px rgba(20,30,50,.04),0 8px 24px rgba(20,30,50,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Pretendard',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px;margin:0 auto;padding:26px 20px 90px}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .mk{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1f6feb,#0b3d91);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12px}
+  .brand b{font-size:15px;font-weight:700}.brand span{display:block;font-size:11.5px;color:var(--ink-soft)}
+  .conf{margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--warn);border:1px solid #f0d6b8;background:#fdf4e7;border-radius:6px;padding:5px 10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:26px;margin-bottom:16px}
+  h1{font-size:21px;margin:0 0 4px}.lead{color:var(--ink-soft);font-size:13.5px;margin:0 0 4px}
+  .sec-t{font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.02em;margin:2px 0 14px;display:flex;align-items:center;gap:8px}
+  .sec-t .n{width:20px;height:20px;border-radius:6px;background:var(--accent);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+  label.fld{display:block}.lb{font-size:12.5px;font-weight:600;margin-bottom:5px;display:block;color:var(--ink-soft)}
+  input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13.5px;font-family:inherit;color:var(--ink);background:#fff}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(31,111,235,.10)}
+  textarea{resize:vertical;min-height:70px}
+  .grid{display:grid;gap:12px}
+  .g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr 1fr}
+  .people{border:1px solid var(--line-soft);border-radius:10px;padding:14px;margin-bottom:10px}
+  .people .who{font-size:12px;font-weight:800;color:var(--accent);margin-bottom:10px}
+
+  /* 평가 항목 */
+  .cat-band{font-size:12px;font-weight:800;color:#fff;background:var(--accent);border-radius:8px 8px 0 0;padding:8px 14px;margin-top:18px;display:flex;justify-content:space-between}
+  .cat-band .w{opacity:.85;font-weight:600}
+  .item{border:1px solid var(--line);border-top:none;padding:16px 14px}
+  .item:last-of-type{border-radius:0 0 8px 8px}
+  .item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .item-name{font-weight:700;font-size:14px}.item-name .bp{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-left:6px}
+  .item-desc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;max-width:560px}
+  .earned{font-size:13px;font-weight:800;color:var(--accent);white-space:nowrap;background:var(--accent-soft);border-radius:8px;padding:6px 12px}
+  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
+  .sc{border:1.5px solid var(--line);border-radius:9px;padding:9px 4px;text-align:center;cursor:pointer;transition:.1s;background:#fff}
+  .sc:hover{border-color:#b9c6e6}.sc.on{border-color:var(--accent2);background:var(--accent-soft);box-shadow:0 0 0 3px rgba(31,111,235,.08)}
+  .sc .v{font-size:16px;font-weight:800}.sc .l{font-size:10.5px;color:var(--ink-soft);margin-top:2px}
+  .sc.on .v{color:var(--accent2)}
+  .crit-toggle{margin-top:10px;font-size:12px;color:var(--accent2);background:none;border:none;cursor:pointer;padding:4px 0;font-weight:600}
+  .crit{display:none;margin-top:8px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+  .crit.show{display:block}
+  .crit table{width:100%;border-collapse:collapse;font-size:11.5px}
+  .crit th{background:var(--line-soft);padding:7px 9px;text-align:left;font-weight:700;white-space:nowrap}
+  .crit td{padding:7px 9px;border-top:1px solid var(--line-soft);vertical-align:top}
+  .crit td.s{font-weight:800;white-space:nowrap;width:64px}
+  .crit tr.hl td{background:var(--accent-soft)}
+  .crit .clbadge{font-size:10.5px;color:var(--ink-soft);padding:6px 9px;background:#fbfcfe;border-top:1px solid var(--line-soft)}
+
+  /* 총점 */
+  .total-box{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,#0b3d91,#1f6feb);color:#fff;border-radius:12px;padding:22px 24px;margin-top:20px}
+  .total-box .big{font-size:40px;font-weight:800;line-height:1}.total-box .big small{font-size:18px;opacity:.7;font-weight:600}
+  .total-box .lbl{font-size:12px;opacity:.85;margin-bottom:4px}
+  .grade-chip{font-size:30px;font-weight:800;border-radius:12px;padding:10px 22px;background:rgba(255,255,255,.16)}
+  .subtotals{display:flex;gap:22px;margin-left:auto;flex-wrap:wrap}
+  .subtotals div{font-size:12px;opacity:.9}.subtotals b{display:block;font-size:19px;font-weight:800}
+
+  .gradekey{display:flex;gap:6px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft);margin-top:12px}
+  .gradekey span{border:1px solid var(--line);border-radius:6px;padding:3px 9px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:none;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+  .btn.primary{background:var(--accent);color:#fff}.btn.primary:hover{background:#0a336f}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}.btn.ghost:hover{border-color:#b9c6e6}
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap}
+  .note{font-size:11.5px;color:var(--ink-soft);background:var(--line-soft);border-radius:9px;padding:11px 14px;margin-top:14px;line-height:1.5}
+  .sign-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+
+  @media print{
+    body{background:#fff}.wrap{max-width:100%;padding:0}
+    .topbar .conf{display:none}.actions,.crit-toggle{display:none}.crit{display:none!important}
+    .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid;margin-bottom:10px}
+    .total-box{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+  @media(max-width:720px){.g4,.g3{grid-template-columns:1fr 1fr}.scale{grid-template-columns:repeat(5,1fr)}.sc .l{display:none}.subtotals{margin-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand"><div class="mk">HR</div>
+      <div><b>온보딩 적응 만족도 · 담당임원 결재</b><span>2차 (D+90) · 인재개발팀</span></div></div>
+    <div class="conf">CONFIDENTIAL</div>
+  </div>
+
+  <div class="card" id="stageBanner" style="padding:16px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span id="stagePill" style="font-size:12px;font-weight:800;color:#fff;background:var(--accent);border-radius:7px;padding:5px 12px"></span>
+    <span id="stageDesc" class="muted" style="font-size:13px"></span>
+    <button id="execEntryBtn" class="btn ghost" style="margin-left:auto;padding:8px 13px;font-size:12.5px" onclick="enterExecByCode()">임원 결재 코드로 이어받기</button>
+  </div>
+
+  <!-- 1. 인적사항 -->
+  <div class="card">
+    <div class="sec-t"><span class="n">1</span>인적사항</div>
+    <div class="people"><div class="who">입사자</div>
+      <div class="grid g4">
+        <label class="fld"><span class="lb">소속</span><input id="p_dept"></label>
+        <label class="fld"><span class="lb">성명</span><input id="p_name"></label>
+        <label class="fld"><span class="lb">입사일</span><input type="date" id="p_hire"></label>
+        <label class="fld"><span class="lb">직급 (CL)</span>
+          <select id="p_cl" onchange="onCLChange()"><option value="">선택</option>
+            <option>CL1</option><option>CL2</option><option>CL3</option><option>CL4</option><option>CL4(p)</option></select></label>
+      </div></div>
+    <div class="people"><div class="who">팀장 (평가자)</div>
+      <div class="grid g4">
+        <label class="fld"><span class="lb">소속</span><input id="hm_dept"></label>
+        <label class="fld"><span class="lb">성명</span><input id="hm_name"></label>
+        <label class="fld"><span class="lb">평가일</span><input type="date" id="hm_date"></label>
+        <label class="fld"><span class="lb">서명 (성명)</span><input id="hm_sign"></label>
+      </div></div>
+    <div class="people"><div class="who">담당임원 (결재자)</div>
+      <div class="grid g4">
+        <label class="fld"><span class="lb">소속</span><input id="ex_dept"></label>
+        <label class="fld"><span class="lb">성명</span><input id="ex_name"></label>
+        <label class="fld"><span class="lb">평가일</span><input type="date" id="ex_date"></label>
+        <label class="fld"><span class="lb">서명 (성명)</span><input id="ex_sign"></label>
+      </div></div>
+    <div class="note">직급(CL)을 선택하면 각 평가 항목의 <b>기준 보기</b>에 해당 직급 기준이 강조되어 표시됩니다. (첨부4 · 직급별/항목별 평가 기준)</div>
+  </div>
+
+  <!-- 2. 팀장 평가 -->
+  <div class="card" id="hmCard">
+    <div class="sec-t"><span class="n">2</span>팀장 평가</div>
+    <p class="lead" id="hmLead">각 항목의 수준을 선택하면 배점 대비 취득 점수가 자동 계산됩니다. 항목별 <b>기준 보기</b>로 직급별 판단 기준을 확인할 수 있습니다.</p>
+    <div id="evalArea"></div>
+
+    <div class="total-box">
+      <div><div class="lbl">총점</div><div class="big"><span id="totalScore">0</span><small>/100</small></div></div>
+      <div><div class="lbl">등급</div><div class="grade-chip" id="gradeChip">-</div></div>
+      <div class="subtotals">
+        <div>직무 역량 <b><span id="subJob">0</span>/70</b></div>
+        <div>조직 적응 <b><span id="subOrg">0</span>/30</b></div>
+      </div>
+    </div>
+    <div class="gradekey">
+      <span>S · 95~100</span><span>A · 90~94</span><span>B+ · 80~89</span><span>B · 70~79</span><span>C · 70 미만</span>
+    </div>
+
+    <label class="fld" style="margin-top:18px"><span class="lb">팀장 평가 의견 (객관적 수치 또는 구체적 행동 사례 기반)</span>
+      <textarea id="hm_comment" style="min-height:96px"></textarea></label>
+  </div>
+
+  <!-- 3. 담당임원 평가 -->
+  <div class="card" id="execCard">
+    <div class="sec-t"><span class="n">3</span>담당임원 평가</div>
+    <div class="grid g2" style="align-items:end">
+      <label class="fld"><span class="lb">점수 (0~100 기입)</span>
+        <input type="number" id="ex_score" min="0" max="100" oninput="onExecScore()" placeholder="예) 92"></label>
+      <label class="fld"><span class="lb">등급 (자동 환산)</span>
+        <input id="ex_grade" readonly style="background:var(--line-soft);font-weight:800"></label>
+    </div>
+    <label class="fld" style="margin-top:12px"><span class="lb">담당임원 평가 의견</span>
+      <textarea id="ex_comment" style="min-height:80px"></textarea></label>
+  </div>
+
+  <div class="actions">
+    <button class="btn ghost" onclick="window.print()">인쇄 / PDF 저장</button>
+    <button class="btn ghost" onclick="exportCSV()">결과 CSV 저장</button>
+    <button class="btn primary" id="makeLinkBtn" onclick="makeExecLink()">임원 결재 링크 만들기</button>
+    <button class="btn primary" id="submitBtn" onclick="submitToSheet()" style="display:none">결재 완료 · 시트로 제출</button>
+  </div>
+  <div id="linkOut" style="display:none;margin-top:12px"></div>
+  <div class="note" id="assumptionNote">
+    <b>점수 산정식(수정 가능):</b> 항목별 취득점수 = 배점 × (선택 점수 ÷ 5). 예) 성과 달성도(25점) 5점 선택 → 25점, 3점 선택 → 15점.
+    총점은 직무 역량(70) + 조직 적응(30) 합계이며 위 등급 기준으로 자동 환산합니다. 원본 결재 서식의 산정 방식과 다르면 알려주시면 반영하겠습니다.
+  </div>
+</div>
+
+<script>
+/* ===== [HR 설정] 자동 취합: Google Apps Script 웹앱 주소 (비우면 파일/코드 저장) ===== */
+const SUBMIT_URL='';
+/* ===== 결재 단계: 'hm'(팀장 작성) 또는 'exec'(임원 결재) ===== */
+const _params=new URLSearchParams(location.search);
+let STAGE = _params.get('stage')==='exec' ? 'exec' : 'hm';
+let HM_DATA = null;
+(function(){
+  const d=_params.get('d');
+  if(STAGE==='exec' && d){ try{ HM_DATA=JSON.parse(decodeURIComponent(escape(atob(d)))); }catch(e){ STAGE='hm'; } }
+})();
+function encData(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
+function decData(str){ return JSON.parse(decodeURIComponent(escape(atob(str)))); }
+/* ===== 평가 항목 배점 (첨부3) ===== */
+const CATS=[
+  {name:'직무 역량', weight:70, items:[
+    {key:'perf', t:'성과 달성도', bp:25, d:'부여된 업무 및 과제를 기한 내 기대 수준에 부합하는 결과물을 생산하는가?'},
+    {key:'expert', t:'직무 전문성', bp:15, d:'보유한 경력과 지식을 적용하여 실무에 직접적으로 기여하고 있는가?'},
+    {key:'fit', t:'직무 적합성', bp:15, d:'담당 직무 수행에 필요한 핵심 역량과 전문성을 보유하고 있는가?'},
+    {key:'growth', t:'확장 가능성', bp:15, d:'현재 직무 범위를 넘어 향후 상위 역할로의 성장 잠재력을 보이는가?'},
+  ]},
+  {name:'조직 적응', weight:30, items:[
+    {key:'culture', t:'조직 적합성', bp:10, d:'회사의 핵심 가치와 일하는 방식을 존중하며, 조직의 분위기와 문화에 적응하려 노력하는가?'},
+    {key:'collab', t:'협업 능력', bp:10, d:'동료 및 유관 부서와 원활하게 소통하며, 공동의 목표 달성을 위해 적극적으로 협력하는가?'},
+    {key:'respons', t:'책임감/성실성', bp:10, d:'본인에게 부여된 역할에 대해 주인 의식을 갖고, 문제 시 대안을 찾아 끝까지 완수하려 노력하는가?'},
+  ]},
+];
+const SCALE=[{v:5,l:'기대 이상'},{v:4,l:'기대 부합'},{v:3,l:'부분 부합'},{v:2,l:'기대 미흡'},{v:1,l:'부적합'}];
+const CLCOLS=[['CL1','CL1'],['CL23','CL2·3'],['CL4','CL4'],['CL4p','CL4(p)']];
+
+/* ===== 직급별/항목별 평가 기준 (첨부4) ===== */
+const CRIT={
+ perf:{
+  5:{CL1:'주어진 범위를 넘어 상위 레벨의 복잡한 과업까지 조기에 완수함',CL23:'기대 이상의 고품질 결과물을 자율적으로 창출하며 팀 성과를 견인함',CL4:'부서 전체의 업무 방식 자체를 혁신하여 생산성을 획기적으로 높임',CL4p:'회사의 사업 방향을 선도하며 전략적 관점의 거대한 성과를 창출함'},
+  4:{CL1:'지시받은 실무를 정해진 기한 내에 정확하고 성실하게 완료함',CL23:'별도의 가이드 없이도 맡은 과제를 스스로 완결성 있게 처리함',CL4:'전문 지식을 바탕으로 실무 프로세스와 체계를 직접 정립해 나감',CL4p:'회사 비즈니스 및 기술 활용 전반을 리딩하며 결과물을 도출함'},
+  3:{CL1:'업무는 수행하나 속도가 다소 느리거나 결과물 보완이 자주 필요함',CL23:'일정 준수가 불안정하며 부분적으로 상위자의 가이드가 필요함',CL4:'프로세스 정립보다는 본인의 개인 전문 실무 수행에만 머무름',CL4p:'전사적인 리딩보다는 본부 내의 지엽적인 성과 창출에 국한됨'},
+  2:{CL1:'업무 지연이 반복되며 산출물의 재작업 빈도가 매우 높아 관리가 필요함',CL23:'숙련도 부족으로 본인 업무 완결을 위해 상위자의 개입이 필수적임',CL4:'체계 수립 역량이 부족하여 오히려 팀 전체의 성과 창출을 저해함',CL4p:'전략적 의사결정 부재로 인해 실질적인 사업적 손실을 초래함'},
+  1:{CL1:'업무 처리 능력이 현저히 미달하며 지시 사항 이행이 아예 불가능함',CL23:'본인 업무 처리가 전혀 안 되어 팀 전체 업무 흐름에 차질을 초래함',CL4:'전문성이 전무하여 전문가로서의 과제 수행 자체가 불능한 상태임',CL4p:'잘못된 의사결정으로 인해 회사에 치명적인 손실을 입히고 방치함'}},
+ expert:{
+  5:{CL1:'상위 레벨이 갖춰야 할 지식을 선제적으로 학습하여 실무에 적용함',CL23:'팀 내에서 해결하기 어려운 기술적 난제를 스스로 직접 해결함',CL4:'사외에서도 자문을 구할 정도로 독보적인 기술 고문급 지식을 보유함',CL4p:'업계의 표준을 새롭게 정립하거나 시장 전체를 주도하는 전문성을 보임'},
+  4:{CL1:'기초적인 업무 지식을 충실히 보유하고 실무를 무리 없이 수행함',CL23:'업무 방식과 일정을 스스로 결정하고 노련하게 진행할 줄 안다',CL4:'보유한 전문 지식을 바탕으로 후배 및 동료를 직무적으로 리딩함',CL4p:'외부에서도 인정받는 최고 수준의 방법론을 조직 내에 제시함'},
+  3:{CL1:'이론적인 지식은 있으나 이를 실무에 적용하는 능력이 다소 부족함',CL23:'스스로 판단하기보다 상위자의 의사결정에 의존하는 편임',CL4:'지식 자산화나 리딩 활동보다는 본인 지식을 활용하는 데만 머무름',CL4p:'업계 리딩보다는 사내의 기존 지식을 활용하는 수준에 국한됨'},
+  2:{CL1:'기초 지식이 부족하여 실무 적용 과정에서 사소한 오류가 자주 발생함',CL23:'결정 능력이 부족하여 사소한 업무조차 상위자에게 상시 의존함',CL4:'기술적 신뢰를 주지 못해 전문가로서 동료 리딩이 불가능함',CL4p:'방법론 제시 능력이 없고 전문가로서의 권위가 세워지지 않음'},
+  1:{CL1:'직무 지식 습득 의지가 없고 교육 후에도 전혀 개선의 여지가 없음',CL23:'전문 실무 결여로 인해 회사에 유무형의 손실을 입힐 우려가 큼',CL4:'전문가 역량이 전무하여 후배 멘토링이나 기술 가이드가 불가함',CL4p:'전략적 전문성이 전무하여 채용 목적에 전혀 부합하지 않는 수준임'}},
+ fit:{
+  5:{CL1:'새로운 업무 환경이나 툴, 기술 등을 입사와 동시에 즉각 마스터함',CL23:'직무 분야의 사내 전문가로 인정받으며 핵심 프로젝트를 주도함',CL4:'본부 내 모든 신규 사업의 설계자로서 독보적인 전문성을 발휘함',CL4p:'회사 전체의 포트폴리오를 재편할 수 있는 전략적 제안을 수행함'},
+  4:{CL1:'우리 조직의 직무 지식 및 사내 기술을 습득하는 데 매우 주력함',CL23:'본인의 직무 분야에 대해 사내 강의나 발제가 가능한 수준임',CL4:'새로운 업무나 프로젝트를 직접 제안하고 전문적으로 리딩함',CL4p:'전사적인 전략 및 정책 결정 과정에 실질적인 영향력을 행사함'},
+  3:{CL1:'적응 중이나 기술 활용 및 실무 투입 속도가 기대보다 다소 더딤',CL23:'적합도는 높으나 조직에 실질적으로 기여하는 부분은 보통 수준임',CL4:'제안 활동이 본인의 좁은 직무 범위에만 국한되어 소극적임',CL4p:'정책적인 제안보다는 단순한 실무적 개선 제안 위주로만 수행함'},
+  2:{CL1:'숙달 지연으로 인해 실제 실무에 투입되는 시점이 계속 늦어짐',CL23:'담당 업무에 대한 논리적 설명 능력이 부족하여 신뢰도가 낮음',CL4:'수동적인 태도로 일관하며 새로운 업무에 대한 제안 능력이 없음',CL4p:'의사결정 권한을 주어도 이를 제대로 행사하지 못하고 방황함'},
+  1:{CL1:'채용 시 기대 역량과 실제 역량 차이가 너무 커 업무 배정이 불가함',CL23:'팀 전문성 수준을 오히려 하락시킬 정도로 적응에 완전히 실패함',CL4:'제안 능력 전무로 조직의 활력을 저해하며 채용 목적에 위배됨',CL4p:'전략 수행 자체가 불가능하여 인사 리스크가 매우 큰 채용 실패 상태임'}},
+ growth:{
+  5:{CL1:'난도 높은 상위 업무에 선제적으로 도전하며 성장 가능성을 보임',CL23:'부서 전체의 역량 수준을 한 단계 끌어올리는 데 핵심적으로 기여함',CL4:'부서의 미래 기술 로드맵을 설계하며 장기적인 방향성을 제시함',CL4p:'업계 전체의 인재 육성 패러다임을 바꿀 정도의 영향력을 보임'},
+  4:{CL1:'자기계발에 힘쓰며 신규 업무 및 난도 있는 과제에 적극 도전함',CL23:'본인의 노하우를 바탕으로 후배 지도 및 멘토링을 충실히 수행함',CL4:'부서 교육체계를 수립하고 채용 면접관으로서 인재 검증에 기여함',CL4p:'전사적으로 전문성을 전파하고 새로운 인사/조직 제도를 제안함'},
+  3:{CL1:'상위자의 가이드 안에서만 성장이 가능하며 스스로의 확장이 부족함',CL23:'후배 지도나 지식 공유 등 조직 지원 활동에 다소 소극적임',CL4:'채용이나 육성 활동에 대한 참여도가 낮고 본인 업무에만 집중함',CL4p:'전사적인 전파보다는 부서 내의 지엽적인 교육 지원에만 머무름'},
+  2:{CL1:'성장의지가 낮고 난도가 있거나 새로운 업무를 회피하려는 성향임',CL23:'지식 전파 능력이 없고 본인 업무만 챙기며 주변 성장에 관심 없음',CL4:'부서 체계 개선이나 육성 기여도가 전혀 없어 정체된 모습을 보임',CL4p:'새로운 육성 모델이나 시스템을 제안할 수 있는 잠재력이 부족함'},
+  1:{CL1:'발전 가능성이 전혀 보이지 않으며 조직의 변화에 강하게 저항함',CL23:'독단적인 태도로 후배의 성장을 저해하거나 지식 공유를 거부함',CL4:'리더로서의 자질이 전무하여 조직의 미래 경쟁력을 약화시킴',CL4p:'리더십 결여로 인해 외부 업계 평판까지 저해하는 심각한 상태임'}},
+ culture:{
+  5:{CL1:'조직의 가치를 몸소 실천하여 동료들에게 긍정적인 귀감이 됨',CL23:'팀 전체의 분위기를 활기차고 긍정적으로 만드는 핵심 역할을 함',CL4:'팀의 일하는 방식 자체를 효율적으로 고도화하여 정착시킴',CL4p:'회사의 핵심 가치를 시스템과 제도적 장치로 완전히 안착시킴'},
+  4:{CL1:'회사의 일하는 방식과 문화를 존중하며 안정적으로 적응함',CL23:'본인의 업무 결과물에 대해 팀원들과 책임을 공유하며 융화됨',CL4:'새로운 방법론을 제시하고 이를 실제 조직 실무에 적용해 나감',CL4p:'회사의 전사 전략에 부합하는 올바른 의사결정을 주도적으로 수행함'},
+  3:{CL1:'문화에 적응 중이나 소통이 다소 수동적이며 이질감이 남아 있음',CL23:'책임 공유보다는 본인의 개인 성과를 우선적으로 판단하는 편임',CL4:'기존 방식을 고수하려 하며 조직의 변화에 대한 수용도가 다소 낮음',CL4p:'내린 의사결정이 전사 전략이나 방향성과 가끔 불일치하는 모습임'},
+  2:{CL1:'전 직장의 방식만을 고집하며 조직 내 문화 갈등을 수시로 유발함',CL23:'본인의 실수를 인정하지 않고 책임 회피와 변명으로 일관함',CL4:'리더로서의 책임감이 결여되어 조직의 기강과 분위기를 흐림',CL4p:'리더십 부재로 인해 조직의 고유 가치를 심각하게 훼손함'},
+  1:{CL1:'핵심 가치와 반하는 행동으로 조직의 기강을 심각하게 해침',CL23:'책임 전가와 갈등 유발로 인해 팀원들과의 융화가 원천 불가능함',CL4:'권위적이고 독단적인 태도로 조직 문화를 부정하고 융화를 거부함',CL4p:'독단적인 의사결정으로 조직의 기강을 완전히 파괴하는 상태임'}},
+ collab:{
+  5:{CL1:'타 부서에서도 함께 일하고 싶어 하는 최고의 협업 파트너임',CL23:'부서 간의 복잡하고 예민한 이해관계를 주도적으로 해결함',CL4:'전사적인 협업 체계를 직접 설계하고 조율하며 리딩함',CL4p:'대내외의 수많은 이해관계자를 완벽하게 조율하여 성과를 극대화함'},
+  4:{CL1:'동료 및 상위자와 전문가답게 원활하고 적극적으로 소통함',CL23:'유관 부서와 능숙하게 소통하며 필요한 경우 동료를 지원함',CL4:'동료의 업무에 대해서도 공동의 책임 의식을 갖고 적극 지원함',CL4p:'본인이 내린 의사결정 사항에 대해 전체적인 책임을 끝까지 이행함'},
+  3:{CL1:'업무상 필요한 경우에만 제한적으로 소통하며 다소 수동적임',CL23:'본인의 이해관계가 걸린 경우에만 선택적으로 소통을 이어감',CL4:'동료 지원보다는 본인에게 주어진 책임 완수에만 과하게 집중함',CL4p:'결정 사항에 대한 사후적인 책임 의식이 동료들에 비해 다소 부족함'},
+  2:{CL1:'소통 부재로 인해 협업 과정에서 마찰이 잦고 업무 실수가 발생함',CL23:'협력보다는 본인 부서나 개인의 이익만을 극단적으로 우선시함',CL4:'전문가로서의 권위만을 내세우며 협업 시 동료를 비난하거나 무시함',CL4p:'독선적인 결정으로 인해 잘 구축된 부서 간 협업 관계를 파괴함'},
+  1:{CL1:'고압적이고 비협조적인 태도로 팀 분위기와 협업 체계를 저해함',CL23:'소통 단절로 인해 유관 부서와의 갈등을 고착화시켜 업무를 방해함',CL4:'협업 체계를 고의로 파괴하며 동료를 무시하는 태도가 만연함',CL4p:'전사적인 협업이 아예 불가능한 상태를 초래하여 조직에 피해를 줌'}},
+ respons:{
+  5:{CL1:'보이지 않는 곳에서도 주인의식을 갖고 늘 최선을 다하는 모습을 보임',CL23:'팀 전체의 성실도와 프로 의식을 한 단계 끌어올리는 주역이 됨',CL4:'부서의 실패 상황에서도 본인의 책임으로 안고 솔선수범하여 수습함',CL4p:'전사적 위기 상황에서 전략적 방어막 역할을 수행하며 책임감을 보임'},
+  4:{CL1:'본인에게 맡겨진 역할을 완수하기 위해 강한 책임감을 발휘함',CL23:'상위자와 동시에 업무 결과에 대해 책임지는 든든한 태도를 보임',CL4:'직무 전문가로서 도출된 업무 결과 전체에 대해 무겁게 책임짐',CL4p:'결정한 사항이 회사 전반에 미치는 영향에 대해 끝까지 책임짐'},
+  3:{CL1:'근태는 양호하나 업무에 대한 주인의식이나 몰입도가 다소 부족함',CL23:'난관에 봉착했을 때 스스로 해결하기보다 회피하거나 수동적으로 대처함',CL4:'책임 범위가 본인에게 주어진 좁은 업무 영역에만 한정되어 있음',CL4p:'실행 자체에만 급급하여 결과의 파급효과에 대한 책임감이 낮음'},
+  2:{CL1:'업무 완결을 위한 의지나 끈기가 낮아 중도에 포기하거나 지연됨',CL23:'업무 시한을 가볍게 여기며 잘못된 결과에 대해 책임을 회피함',CL4:'전문가로서 신뢰를 형성하기 어려운 무책임한 태도를 자주 보임',CL4p:'전략적 영향력을 고의로 무시하며 결과에 대해 나 몰라라 하는 식임'},
+  1:{CL1:'업무를 방치하거나 지각 등 기본적인 근태 규정조차 준수하지 않음',CL23:'결과 조작이나 거짓 보고 등 프로 의식이 전혀 보이지 않음',CL4:'고의적인 태업이나 불성실한 모습으로 팀 전체에 악영향을 줌',CL4p:'도덕적 해이(Moral Hazard)로 인해 회사에 막대한 손실을 입힘'}},
+};
+
+const scores={};   // key -> selected level
+const esc=s=>(s??'').toString().replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+function clGroup(){const v=document.getElementById('p_cl').value; if(v==='CL1')return'CL1'; if(v==='CL2'||v==='CL3')return'CL23'; if(v==='CL4')return'CL4'; if(v==='CL4(p)')return'CL4p'; return null;}
+function grade(t){return t>=95?'S':t>=90?'A':t>=80?'B+':t>=70?'B':'C';}
+function gradeColor(g){return{S:'var(--gS)',A:'var(--gA)','B+':'var(--gB1)',B:'var(--gB)',C:'var(--gC)'}[g]||'#fff';}
+
+function buildEval(){
+  let html='';
+  CATS.forEach(cat=>{
+    html+=`<div class="cat-band">${esc(cat.name)}<span class="w">배점 ${cat.weight}점</span></div>`;
+    cat.items.forEach(it=>{
+      html+=`<div class="item">
+        <div class="item-head">
+          <div><div class="item-name">${esc(it.t)}<span class="bp">(배점 ${it.bp})</span></div>
+            <div class="item-desc">${esc(it.d)}</div></div>
+          <div class="earned" id="earn_${it.key}">0 / ${it.bp}</div>
+        </div>
+        <div class="scale">${SCALE.map(s=>`
+          <div class="sc" id="sc_${it.key}_${s.v}" onclick="pick('${it.key}',${s.v})">
+            <div class="v">${s.v}</div><div class="l">${esc(s.l)}</div></div>`).join('')}</div>
+        <button class="crit-toggle" onclick="toggleCrit('${it.key}')">기준 보기 &#9662;</button>
+        <div class="crit" id="crit_${it.key}">${critTable(it.key)}</div>
+      </div>`;
+    });
+  });
+  document.getElementById('evalArea').innerHTML=html;
+}
+function critTable(key){
+  const g=clGroup();
+  let rows='';
+  [5,4,3,2,1].forEach(sv=>{
+    const cells=CLCOLS.map(([code])=>`<td${g===code?' style="font-weight:600"':''}>${esc(CRIT[key][sv][code])}</td>`).join('');
+    rows+=`<tr class="${scores[key]===sv?'hl':''}" data-s="${sv}"><td class="s">${sv}점</td>${cells}</tr>`;
+  });
+  const head=CLCOLS.map(([code,lbl])=>`<th${g===code?' style="color:var(--accent2)"':''}>${lbl}</th>`).join('');
+  return `<table><thead><tr><th>점수</th>${head}</tr></thead><tbody>${rows}</tbody></table>
+    <div class="clbadge">${g?'현재 입사자 직급('+document.getElementById('p_cl').value+') 기준 열이 강조됩니다.':'직급(CL)을 선택하면 해당 열이 강조됩니다.'}</div>`;
+}
+function toggleCrit(key){document.getElementById('crit_'+key).classList.toggle('show');}
+function pick(key,v){
+  scores[key]=v;
+  CATS.flatMap(c=>c.items).forEach(it=>{if(it.key===key){
+    [5,4,3,2,1].forEach(s=>document.getElementById(`sc_${key}_${s}`).classList.toggle('on',s===v));
+    const earned=it.bp*v/5; document.getElementById('earn_'+key).textContent=`${earned} / ${it.bp}`;
+  }});
+  // 기준표 하이라이트 갱신
+  const box=document.getElementById('crit_'+key);
+  box.querySelectorAll('tr[data-s]').forEach(tr=>tr.classList.toggle('hl',Number(tr.dataset.s)===v));
+  recalc();
+}
+function recalc(){
+  let job=0,org=0;
+  CATS.forEach(cat=>cat.items.forEach(it=>{
+    const v=scores[it.key]; if(!v) return;
+    const e=it.bp*v/5; if(cat.name==='직무 역량') job+=e; else org+=e;
+  }));
+  const total=job+org, g=grade(total);
+  document.getElementById('subJob').textContent=job;
+  document.getElementById('subOrg').textContent=org;
+  document.getElementById('totalScore').textContent=total;
+  const chip=document.getElementById('gradeChip');
+  const allDone=CATS.flatMap(c=>c.items).every(it=>scores[it.key]);
+  chip.textContent=allDone?g:'-';
+  chip.style.background=allDone?gradeColor(g):'rgba(255,255,255,.16)';
+}
+function onCLChange(){
+  CATS.flatMap(c=>c.items).forEach(it=>{
+    const box=document.getElementById('crit_'+it.key);
+    const wasOpen=box.classList.contains('show');
+    box.innerHTML=critTable(it.key); if(wasOpen)box.classList.add('show');
+  });
+}
+function onExecScore(){
+  const v=document.getElementById('ex_score').value;
+  const el=document.getElementById('ex_grade');
+  if(v===''||isNaN(v)){el.value='';return;}
+  const n=Math.max(0,Math.min(100,Number(v)));
+  el.value=grade(n)+'등급';
+}
+
+/* ===== 저장/내보내기 ===== */
+function execFields(){
+  const g=id=>document.getElementById(id).value;
+  return {소속:g('ex_dept'),성명:g('ex_name'),평가일:g('ex_date'),서명:g('ex_sign'),점수:g('ex_score'),등급:g('ex_grade'),의견:g('ex_comment')};
+}
+function collect(){
+  const g=id=>document.getElementById(id).value;
+  /* 임원 단계: 복원된 팀장 데이터를 그대로 쓰고 담당임원만 화면값으로 채움 */
+  if(STAGE==='exec' && HM_DATA){
+    const base=JSON.parse(JSON.stringify(HM_DATA));
+    base._type='approval';
+    base.담당임원=execFields();
+    base.제출시각=new Date().toLocaleString('ko-KR');
+    return base;
+  }
+  /* 팀장 단계 */
+  const items={}; CATS.flatMap(c=>c.items).forEach(it=>{
+    const v=scores[it.key]||''; items[it.t]={선택:v, 취득:v?it.bp*v/5:'', 배점:it.bp};
+  });
+  let job=0,org=0; CATS.forEach(c=>c.items.forEach(it=>{const v=scores[it.key];if(v){const e=it.bp*v/5;c.name==='직무 역량'?job+=e:org+=e;}}));
+  const total=job+org;
+  return {
+    _type:'approval', 제출시각:new Date().toLocaleString('ko-KR'),
+    입사자:{소속:g('p_dept'),성명:g('p_name'),입사일:g('p_hire'),직급:g('p_cl')},
+    팀장:{소속:g('hm_dept'),성명:g('hm_name'),평가일:g('hm_date'),서명:g('hm_sign'),의견:g('hm_comment')},
+    담당임원:execFields(),
+    팀장평가:items, 직무역량점수:job, 조직적응점수:org, 총점:total, 등급:grade(total)
+  };
+}
+function exportCSV(){
+  const d=collect(); const row={};
+  row['입사자소속']=d.입사자.소속; row['입사자성명']=d.입사자.성명; row['입사일']=d.입사자.입사일; row['직급']=d.입사자.직급;
+  Object.entries(d.팀장평가).forEach(([k,v])=>{row[k+'_선택']=v.선택; row[k+'_취득']=v.취득;});
+  row['직무역량']=d.직무역량점수; row['조직적응']=d.조직적응점수; row['총점']=d.총점; row['팀장환산등급']=d.등급;
+  row['팀장의견']=d.팀장.의견; row['팀장서명']=d.팀장.서명;
+  row['임원점수']=d.담당임원.점수; row['임원등급']=d.담당임원.등급; row['임원의견']=d.담당임원.의견; row['임원서명']=d.담당임원.서명;
+  const cols=Object.keys(row); const cell=v=>{v=(v??'').toString();return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const csv=cols.join(',')+'\n'+cols.map(c=>cell(row[c])).join(',');
+  dl(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}), `결재_${d.입사자.성명||'입사자'}_${d.총점}점_${d.등급}.csv`);
+}
+function saveJSON(){
+  const d=collect();
+  dl(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}), `결재_${d.입사자.성명||'입사자'}.json`);
+}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();}
+function copyApprovalCode(){
+  const code='HRONB1:'+btoa(unescape(encodeURIComponent(JSON.stringify(collect()))));
+  const doCopy=()=>{const o=event&&event.target?event.target.textContent:'';if(event&&event.target){event.target.textContent='복사됨 ✓';setTimeout(()=>event.target.textContent=o,1500);}};
+  if(navigator.clipboard){navigator.clipboard.writeText(code).then(doCopy).catch(()=>prompt('아래 코드를 복사해 회신하세요',code));}
+  else prompt('아래 코드를 복사해 회신하세요',code);
+}
+
+async function submitToSheet(){
+  const btn=document.getElementById('submitBtn'); btn.disabled=true; const orig=btn.textContent; btn.textContent='제출 중...';
+  const rec=collect();
+  if(!SUBMIT_URL){
+    btn.disabled=false; btn.textContent=orig;
+    alert('자동 전송 주소(SUBMIT_URL)가 설정되지 않았습니다. 결재 데이터(JSON)로 저장해 HR에 회신해 주세요.'); saveJSON(); return;
+  }
+  try{
+    await fetch(SUBMIT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec)});
+    btn.textContent='결재 완료 ✓';
+    document.getElementById('linkOut').style.display='block';
+    document.getElementById('linkOut').innerHTML='<div class="note" style="background:var(--ok-soft);color:var(--ok);border:1px solid #bfe3d0"><b>결재가 접수되었습니다.</b> 인재개발팀 시트에 자동으로 반영되었습니다.</div>';
+  }catch(e){
+    btn.disabled=false; btn.textContent=orig;
+    alert('전송이 차단된 것 같습니다. 결재 데이터(JSON)로 저장해 회신해 주세요.'); saveJSON();
+  }
+}
+
+/* ===== 링크 인계 ===== */
+function hmRequiredOk(){
+  const g=id=>document.getElementById(id).value.trim();
+  const allScored=CATS.flatMap(c=>c.items).every(it=>scores[it.key]);
+  return allScored && g('p_name') && g('p_cl') && g('hm_name') && g('hm_sign');
+}
+function makeExecLink(){
+  if(!hmRequiredOk()){ alert('임원에게 넘기기 전에 7개 항목 점수와 입사자·팀장 정보(성명/직급/서명)를 모두 채워 주세요.'); return; }
+  const d=encData(collect());               /* 팀장 단계 collect = 팀장 작성분(담당임원 빈값) */
+  const base=location.origin+location.pathname;
+  const link=base+'?stage=exec&d='+encodeURIComponent(d);
+  const code='HMAPPR1:'+d;
+  const out=document.getElementById('linkOut');
+  out.style.display='block';
+  out.innerHTML=`<div class="note" style="line-height:1.6">
+    <b>임원에게 전달할 결재 링크가 생성되었습니다.</b> 아래 링크를 담당임원에게 보내면, 임원은 팀장 평가를 확인하고 본인 결재만 하면 됩니다.
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <input id="linkField" readonly value="${link.replace(/"/g,'&quot;')}" style="flex:1;min-width:240px;font-size:12px">
+      <button class="btn ghost sm" style="padding:8px 13px" onclick="copyText(document.getElementById('linkField').value,this)">링크 복사</button>
+      <button class="btn ghost sm" style="padding:8px 13px" onclick="copyText('${code}',this)">코드 복사</button>
+    </div>
+    <div class="muted" style="margin-top:8px;font-size:11.5px">링크가 메신저에서 잘리면, 코드를 복사해 임원이 이 툴 상단의 "임원 결재 코드로 이어받기"에 붙여넣도록 안내하세요.</div>
+  </div>`;
+  out.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function copyText(t,btn){
+  const done=()=>{const o=btn.textContent;btn.textContent='복사됨 ✓';setTimeout(()=>btn.textContent=o,1500);};
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(done).catch(()=>prompt('복사하세요',t));}
+  else prompt('복사하세요',t);
+}
+function enterExecByCode(){
+  const raw=prompt('임원 결재 코드(HMAPPR1: 로 시작)를 붙여넣으세요');
+  if(!raw)return;
+  const s=raw.trim().replace(/^HMAPPR1:/,'');
+  try{ HM_DATA=decData(s); STAGE='exec'; applyStage(); window.scrollTo(0,0); }
+  catch(e){ alert('코드를 인식하지 못했습니다. 다시 확인해 주세요.'); }
+}
+
+/* ===== 단계별 화면 구성 ===== */
+function hmSummaryHTML(d){
+  const rows=Object.entries(d.팀장평가||{}).map(([k,v])=>
+    `<tr><td style="padding:7px 10px;border-top:1px solid var(--line-soft)">${k}</td>
+     <td style="padding:7px 10px;border-top:1px solid var(--line-soft);text-align:center">${v.선택||'-'}점</td>
+     <td style="padding:7px 10px;border-top:1px solid var(--line-soft);text-align:right;font-weight:700">${v.취득!==''?v.취득:'-'} / ${v.배점}</td></tr>`).join('');
+  return `<div style="border:1px solid var(--line);border-radius:10px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="background:var(--line-soft)">
+        <th style="text-align:left;padding:8px 10px;font-size:11.5px">평가 항목</th>
+        <th style="padding:8px 10px;font-size:11.5px">선택</th>
+        <th style="text-align:right;padding:8px 10px;font-size:11.5px">취득 / 배점</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    ${d.팀장?.의견?`<div style="margin-top:12px"><div class="lb" style="font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:4px">팀장 평가 의견</div><div style="font-size:13.5px;white-space:pre-wrap;background:var(--line-soft);border-radius:9px;padding:11px 13px">${(d.팀장.의견||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div></div>`:''}`;
+}
+function applyStage(){
+  const pill=document.getElementById('stagePill'), desc=document.getElementById('stageDesc');
+  const g=id=>document.getElementById(id);
+  if(STAGE==='hm'){
+    pill.textContent='1단계 · 팀장 평가 작성';
+    desc.textContent='평가를 마친 뒤 "임원 결재 링크 만들기"를 누르면 담당임원에게 보낼 링크가 생성됩니다.';
+    g('execCard').style.display='none';
+    g('makeLinkBtn').style.display=''; g('submitBtn').style.display='none';
+    g('execEntryBtn').style.display='';
+  }else{
+    pill.textContent='2단계 · 담당임원 결재';
+    desc.textContent='팀장 평가 결과를 확인하고 아래에서 결재(점수·의견·서명)하신 뒤 제출하세요.';
+    g('execEntryBtn').style.display='none';
+    // 인적사항: 팀장 데이터로 채우고 잠금
+    const d=HM_DATA||{};
+    const set=(id,v)=>{const el=g(id);if(el){el.value=v||'';el.disabled=true;}};
+    set('p_dept',d.입사자?.소속);set('p_name',d.입사자?.성명);set('p_hire',d.입사자?.입사일);
+    const cl=g('p_cl'); if(cl){cl.value=d.입사자?.직급||'';cl.disabled=true;}
+    set('hm_dept',d.팀장?.소속);set('hm_name',d.팀장?.성명);set('hm_date',d.팀장?.평가일);set('hm_sign',d.팀장?.서명);
+    // 담당임원 입력은 활성 유지
+    ['ex_dept','ex_name','ex_date','ex_sign','ex_score','ex_comment'].forEach(id=>{const el=g(id);if(el)el.disabled=false;});
+    // 팀장 평가: 읽기전용 요약으로 교체
+    g('hmLead').textContent='팀장이 작성한 평가 결과입니다. 아래 담당임원 결재란에 결재해 주세요.';
+    g('evalArea').innerHTML=hmSummaryHTML(d);
+    // 총점/등급 박스 채우기
+    g('subJob').textContent=d.직무역량점수??0;
+    g('subOrg').textContent=d.조직적응점수??0;
+    g('totalScore').textContent=d.총점??0;
+    const chip=g('gradeChip'); chip.textContent=d.등급||'-'; chip.style.background='rgba(255,255,255,.16)';
+    // 팀장 의견/서명 영역 숨김 (요약에 포함됨)
+    const hc=document.getElementById('hm_comment'); if(hc&&hc.closest('label'))hc.closest('label').style.display='none';
+    g('makeLinkBtn').style.display='none'; g('submitBtn').style.display='';
+  }
+}
+
+if(STAGE==='hm'){ buildEval(); }
+applyStage();
+</script>
+</body>
+</html>
