@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -246,7 +245,7 @@ function loadSelfByCode(){
   if(!raw)return;
   const str=raw.trim().replace(/^SELF1:/,'');
   try{
-    state.selfIn=JSON.parse(decodeURIComponent(escape(atob(str))));
+    state.selfIn=JSON.parse(b64urlDec(str));
     const p=state.selfIn.p||{};
     if(p.name)state.profile.target=p.name; if(p.cl)state.profile.cl=p.cl; if(p.hire)state.profile.hire=p.hire; if(p.dept&&!state.profile.dept)state.profile.dept=p.dept;
     render();
@@ -327,15 +326,18 @@ function downloadJSON(rec){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fileLabel(rec)+'.json';a.click();
 }
 function makeCode(rec){return 'HRONB1:'+btoa(unescape(encodeURIComponent(JSON.stringify(rec))));}
+/* URL에 안전한 base64 (+ / = 를 - _ 로 치환하여 주소에서 깨지지 않게) */
+function b64urlEnc(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function b64urlDec(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}
 function makeSelfPayload(){
   const p=state.profile;
   return {p:{name:p.name,cl:p.cl,hire:p.hire,dept:p.dept}, s:SELF_ITEMS.map((_,i)=>state.answers['sc'+i]||'')};
 }
 function makeSelfLink(){
-  const enc=btoa(unescape(encodeURIComponent(JSON.stringify(makeSelfPayload()))));
-  return location.origin+location.pathname+'?round=2&role=hm&sc='+encodeURIComponent(enc);
+  const enc=b64urlEnc(JSON.stringify(makeSelfPayload()));
+  return location.origin+location.pathname+'?round=2&role=hm&sc='+enc;
 }
-function makeSelfCode(){ return 'SELF1:'+btoa(unescape(encodeURIComponent(JSON.stringify(makeSelfPayload())))); }
+function makeSelfCode(){ return 'SELF1:'+b64urlEnc(JSON.stringify(makeSelfPayload())); }
 function selfHandoffBox(){
   const link=makeSelfLink(), code=makeSelfCode();
   return `<div class="return-box" style="text-align:left">
@@ -390,9 +392,12 @@ function initParams(){
     const ro=q.get('role'); if(ro==='new'||ro==='hm')state.role=ro;
     syncKey();
     ['dept','name','target','cl','hire'].forEach(k=>{const v=q.get(k); if(v)state.profile[k]=v;});
-    const sc=q.get('sc');
-    if(sc){ try{
-      state.selfIn=JSON.parse(decodeURIComponent(escape(atob(sc))));
+    /* sc는 URLSearchParams가 아닌 raw 추출로 읽어, 예전 링크의 + 손실을 막고
+       예전(표준 base64)·새(URL-safe) 링크를 모두 인식한다 */
+    const scM=location.search.match(/[?&]sc=([^&]*)/);
+    if(scM){ try{
+      const sc=decodeURIComponent(scM[1]);
+      state.selfIn=JSON.parse(b64urlDec(sc));
       const p=state.selfIn.p||{};
       if(p.name)state.profile.target=p.name;
       if(p.cl)state.profile.cl=p.cl;
